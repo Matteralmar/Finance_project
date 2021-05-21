@@ -70,16 +70,26 @@ def parse_monobank():
     data = response.json()
     for row in data:
         if row['currencyCodeA'] in currency_map:
-            buy = row['rateBuy']
-            sale = row['rateSell']
-            ccy = currency_map[row['currencyCodeA']]
-            cr_last = Currency.objects.filter(currency=ccy, source=2).last()
-            is_currency_empty = cr_last is None
-            if is_currency_empty:
-                is_currency_new_value = cr_last.buy != buy or cr_last.sale != sale
-                if is_currency_new_value:
-                    Currency.objects.create(currency=ccy, source=2, buy=buy, sale=sale)
-
+            if row['currencyCodeA'] == 840:
+                buy = row['rateBuy']
+                sale = row['rateSell']
+                ccy = currency_map[row['currencyCodeA']]
+                cr_last = Currency.objects.filter(currency=ccy, source=2).last()
+                is_currency_empty = cr_last is None
+                if is_currency_empty:
+                    is_currency_new_value = cr_last.buy != buy or cr_last.sale != sale
+                    if is_currency_new_value:
+                        Currency.objects.create(currency=ccy, source=2, buy=buy, sale=sale)
+            if row['currencyCodeA'] == 978:
+                buy = row['rateBuy']
+                sale = row['rateSell']
+                ccy = currency_map[row['currencyCodeA']]
+                cr_last = Currency.objects.filter(currency=ccy, source=2).last()
+                is_currency_empty = cr_last is None
+                if is_currency_empty:
+                    is_currency_new_value = cr_last.buy != buy or cr_last.sale != sale
+                    if is_currency_new_value:
+                        Currency.objects.create(currency=ccy, source=2, buy=buy, sale=sale)
 
 @shared_task
 def parse_vkurse():
@@ -100,28 +110,24 @@ def parse_vkurse():
         logging.error(err, exc_info=True)
 
     data = response.json()
-    for row in data:
-        print(row['Dollar'])
-        if row['Dollar']:
-            ccy = row['Dollar']
-            buy = ccy[row['buy']]
-            sale = ccy[row['sale']]
-            cr_last = Currency.objects.filter(currency=1, source=3).last()
-            is_currency_empty = cr_last is None
-            if is_currency_empty:
-                is_currency_new_value = cr_last.buy != buy or cr_last.sale != sale
-                if is_currency_new_value:
-                    Currency.objects.create(currency=1, source=3, buy=buy, sale=sale)
-        if row['Euro']:
-            ccy = row['Euro']
-            buy = ccy[row['buy']]
-            sale = ccy[row['sale']]
-            cr_last = Currency.objects.filter(currency=2, source=3).last()
-            is_currency_empty = cr_last is None
-            if is_currency_empty:
-                is_currency_new_value = cr_last.buy != buy or cr_last.sale != sale
-                if is_currency_new_value:
-                    Currency.objects.create(currency=2, source=3, buy=buy, sale=sale)
+    if data['Dollar']:
+        buy = data['Dollar']['buy']
+        sale = data['Dollar']['sale']
+        cr_last = Currency.objects.filter(currency=1, source=3).last()
+        is_currency_empty = cr_last is None
+        if is_currency_empty:
+            is_currency_new_value = cr_last.buy != buy or cr_last.sale != sale
+            if is_currency_new_value:
+                Currency.objects.create(currency=1, source=3, buy=buy, sale=sale)
+    if data['Euro']:
+        buy = data['Euro']['buy']
+        sale = data['Euro']['sale']
+        cr_last = Currency.objects.filter(currency=2, source=3).last()
+        is_currency_empty = cr_last is None
+        if is_currency_empty:
+            is_currency_new_value = cr_last.buy != buy or cr_last.sale != sale
+            if is_currency_new_value:
+                Currency.objects.create(currency=2, source=3, buy=buy, sale=sale)
 
 
 @shared_task

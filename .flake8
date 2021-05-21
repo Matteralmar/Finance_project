@@ -1,0 +1,7 @@
+[flake8]
+inline-quotes="
+max-complexity=10
+import-order-style=google
+max-line-length=120
+ignore=Q000,A001,D,F,E117,I101,I201,W292,I100,W391,I202,E501
+
